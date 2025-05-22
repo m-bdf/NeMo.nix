@@ -1,10 +1,7 @@
 {
-  cacert,
-  go,
   lib,
   nemo,
   nix2container,
-  python3Packages,
   requireFile,
   runCommand,
   skopeo-nix2container,
@@ -86,30 +83,5 @@ in
     } ''
       mkdir -p $out${builtins.storeDir}
       ${lib.getExe undocker} $image - | tar -xvC $out || true
-    '';
-
-
-  pullNeMoImage = image:
-  let
-    variant = lib.findFirst
-      (v: v.architecture == go.GOARCH)
-      (throw "Architecture not supported")
-      image.architectureVariants;
-  in
-    nemo.lib.pullImageFromDigest variant.digest {
-      registryUrl = "nvcr.io";
-      imageName = "nvidia/nemo";
-      imageTag = image.tag;
-    };
-
-  pullNeMoModel = name: hash:
-    runCommand "${name}.nemo" {
-      nativeBuildInputs = [ cacert python3Packages.hf-xet ];
-      HF_XET_HIGH_PERFORMANCE = true;
-      outputHash = hash;
-    } ''
-      mv $(readlink -e $(HF_HOME=/tmp ${
-        lib.getExe python3Packages.huggingface-hub
-      } download nvidia/${name} ${name}.nemo)) $out
     '';
 }
