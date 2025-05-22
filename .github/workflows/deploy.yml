@@ -1,0 +1,61 @@
+name: deploy
+on:
+  push:
+    branches: [main]
+  schedule:
+    - cron: 42 23 * * *
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}
+  cancel-in-progress: true
+
+jobs:
+  fetch:
+    permissions:
+      contents: read
+
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@main
+      - uses: nixbuild/nix-quick-install-action@master
+
+      - run: |
+          mkdir sources && jq -n "{
+            images: $(nix run .#fetchImageDigests),
+            models: $(nix run .#fetchModelHashes),
+          }" > sources/index.json
+
+      - uses: actions/upload-pages-artifact@main
+        with:
+          path: sources
+
+  deploy:
+    needs: fetch
+
+    permissions:
+      pages: write
+      id-token: write
+
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+
+    runs-on: ubuntu-latest
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@main
+
+  chore:
+    needs: deploy
+
+    permissions:
+      deployments: write
+      actions: write
+
+    runs-on: ubuntu-latest
+    steps:
+      - uses: int128/delete-deployments-action@v1
+      - uses: Mattraks/delete-workflow-runs@main
+        with:
+          retain_days: 0
