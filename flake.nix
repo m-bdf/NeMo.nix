@@ -9,14 +9,13 @@
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
-    nemoImages = {
-      type = "file";
-      url = "https://catalog.ngc.nvidia.com/api/containers/images?orgName=nvidia&name=nemo&isPublic=true";
+    sources = {
+      url = "https://m-bdf.github.io/NeMo.nix";
       flake = false;
     };
   };
 
-  outputs = { self, systems, nixpkgs, nix2container, nemoImages }: {
+  outputs = { self, systems, nixpkgs, nix2container, sources }: {
 
     packages = with nixpkgs.lib;
       genAttrs (import systems) (system: rec {
@@ -26,15 +25,8 @@
           nix2container.packages.${system}
         );
 
-        images = listToAttrs (map (image:
-          nameValuePair image.tag (lib.pullNeMoImage image)
-        ) (importJSON nemoImages).images);
-
-        models = mapAttrs lib.pullNeMoModel {
-          canary-1b = "sha256-sChBg6mh4Dmi//OUJ+KZH6TfC5YSo0R/wz/4KyD9+1o=";
-          canary-1b-flash = "sha256-OIfM4a/dQlQpz8UQlXWo8s/+sHwCxQOp+v92Er104yQ=";
-          canary-180m-flash = "sha256-e5feGLcY7wG/M5hxXOjRhIbE2Dlh4jAjCyb1cS4RJnU=";
-        };
+        images = mapAttrs lib.pullNeMoImage (importJSON sources).images;
+        models = mapAttrs lib.pullNeMoModel (importJSON sources).models;
       });
 
     overlays.default = final: prev: {
