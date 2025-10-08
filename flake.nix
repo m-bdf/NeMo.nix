@@ -41,33 +41,9 @@
       }).nemo
     );
 
-    nixosModules = {
-      default = {
-        imports = [ ./options.nix ./config.nix ];
-        nixpkgs.overlays = [ self.overlays.default ];
-      };
-
-      asr = { lib, pkgs, ... }: {
-        imports = [ self.nixosModules.default ];
-
-        services.nemo = lib.mkDefault {
-          enable = true;
-          image = pkgs.nemo.images."25.07";
-          model = pkgs.nemo.models.canary-1b-flash;
-
-          mounts.asr = "/usr/share/asr";
-          libs = ps: with ps; [ watchfiles ];
-          script = ''
-            print("Watching for changes in /usr/share/asr...")
-            from watchfiles import watch, Change
-            for changes in watch("asr", recursive=False):
-              for (change, path) in changes:
-                if change is Change.added and path.endswith(".wav"):
-                  transcript = model.transcribe(path)[0]
-                  print(transcript.text)
-          '';
-        };
-      };
+    nixosModules.default = {
+      imports = [ ./options.nix ./config.nix ];
+      nixpkgs.overlays = [ self.overlays.default ];
     };
   };
 }
