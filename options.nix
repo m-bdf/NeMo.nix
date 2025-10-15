@@ -1,4 +1,4 @@
-{ config, lib, ... }:
+{ options, config, lib, ... }:
 
 with lib;
 with types;
@@ -13,6 +13,7 @@ let
         };
       };
 
+  opts = options.services.nemo;
   cfg = config.services.nemo;
 in
 
@@ -33,6 +34,8 @@ in
     preload = mkOption {
       type = nullOr (enum [ "store" "rootfs" ]);
       default = if cfg.image.isRef then null else "rootfs";
+      defaultText = literalExpression
+        ''if ${opts.image}.isRef then null else "rootfs"'';
       description = ''
         Strategy for loading the image at build time:
         - `null`: do not pre-load the image, only load it at runtime
@@ -46,6 +49,8 @@ in
     runtime = mkOption {
       type = nullOr (enum [ "nspawn" "podman" ]);
       default = if cfg.preload != "rootfs" then "podman" else null;
+      defaultText = literalExpression
+        ''if ${opts.preload} != "rootfs" then "podman" else null'';
       description = ''
         Container runtime to use:
         - `null`: directly run the script in a systemd service isolated
@@ -78,6 +83,7 @@ in
     libs = mkOption {
       type = functionTo (listOf package);
       default = ps: [];
+      defaultText = literalExpression "ps: []";
       description = ''
         Function which given a Python 3 package set returns extra libraries
         needed by the script that will be added to its PYTHONPATH.

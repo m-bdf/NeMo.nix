@@ -7,8 +7,8 @@ using any NeMo model, on any NeMo version (in theory),
 with the optional container runtime of your choice (Podman or systemd-nspawn).
 
 It also exposes all official NeMo images and models currently available,
-[whose hashes](https://m-bdf.github.io/NeMo.nix)
-are updated every day by [a GitHub action](.github/workflows/deploy.yml).
+[whose hashes](https://m-bdf.github.io/NeMo.nix/sources.json)
+are updated every day by a GitHub action.
 
 ## Usage
 
@@ -43,7 +43,6 @@ Import the provided module in your NixOS configuration:
 Then set the `services.nemo.enable` option to `true`,
 and specify a NeMo image, an optional NeMo model,
 and a Python script to run as a background service.
-All available options can be found in [options.nix](options.nix).
 
 ## Example
 
