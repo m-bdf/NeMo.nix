@@ -10,7 +10,7 @@
     };
 
     sources = {
-      url = "https://m-bdf.github.io/NeMo.nix";
+      url = "https://m-bdf.github.io/NeMo.nix/sources.json";
       flake = false;
     };
   };
@@ -21,6 +21,7 @@
     pkgsWith = pkgs: with pkgs.lib; {
       nemo = pkgs.callPackage ./. {} // {
         lib = pkgs.callPackage ./lib.nix {};
+        docs = pkgs.callPackage ./docs.nix {};
 
         images = mapAttrs pkgs.nemo.pullNeMoImage (importJSON sources).images;
         models = mapAttrs pkgs.nemo.pullNeMoModel (importJSON sources).models;
