@@ -11,7 +11,7 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  fetch:
+  build:
     permissions:
       contents: read
 
@@ -21,17 +21,20 @@ jobs:
       - uses: nixbuild/nix-quick-install-action@master
 
       - run: |
-          mkdir sources && jq -n "{
+          nix build .#docs
+          cp -LR result _site
+          chmod +w _site
+
+      - run: |
+          jq -n "{
             images: $(nix run .#fetchImageDigests),
             models: $(nix run .#fetchModelHashes),
-          }" > sources/index.json
+          }" > _site/sources.json
 
       - uses: actions/upload-pages-artifact@main
-        with:
-          path: sources
 
   deploy:
-    needs: fetch
+    needs: build
 
     permissions:
       pages: write
