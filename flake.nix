@@ -5,7 +5,7 @@
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
 
     nix2container = {
-      url = "github:nlewo/nix2container";
+      url = "github:m-bdf/nix2container";
       inputs.nixpkgs.follows = "nixpkgs";
     };
 
